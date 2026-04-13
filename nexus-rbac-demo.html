@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS AIOps Platform</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700;800&display=swap');
+:root{
+  --bg:#eef2f8;--m1:#d8e8f8;--m2:#e4d8f8;--m3:#d8f0f0;--m4:#f0e8d8;--m5:#d8f0e4;
+  --glass:rgba(255,255,255,0.6);--glass2:rgba(255,255,255,0.84);
+  --brd:rgba(255,255,255,0.85);--brd2:rgba(180,200,240,0.38);
+  --sh:rgba(90,120,200,0.12);--sh2:rgba(70,100,180,0.07);
+  --acc:#2563eb;--acc2:#0891b2;--acc3:#7c3aed;
+  --red:#dc2626;--ora:#ea580c;--yel:#ca8a04;--grn:#059669;--tea:#0891b2;
+  --txt:#1e293b;--txt2:#64748b;--txt3:#94a3b8;--txt4:#cbd5e1;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:'JetBrains Mono',monospace;color:var(--txt);display:flex;flex-direction:column;background:var(--bg)}
+
+/* BG */
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.bb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.6;animation:drift 20s ease-in-out infinite alternate}
+.b1{width:700px;height:700px;background:var(--m1);top:-150px;left:-100px;animation-delay:0s}
+.b2{width:550px;height:550px;background:var(--m2);top:15%;right:-80px;animation-delay:-7s}
+.b3{width:500px;height:500px;background:var(--m3);bottom:-100px;left:25%;animation-delay:-13s}
+.b4{width:420px;height:420px;background:var(--m4);bottom:5%;right:15%;animation-delay:-4s}
+.b5{width:380px;height:380px;background:var(--m5);top:40%;left:40%;animation-delay:-10s}
+@keyframes drift{from{transform:translate(0,0)scale(1)}to{transform:translate(25px,18px)scale(1.05)}}
+
+/* LOGIN */
+#login-screen{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center}
+.lcard{width:460px;background:var(--glass2);backdrop-filter:blur(40px)saturate(2);border:1px solid var(--brd);border-radius:22px;padding:40px;box-shadow:0 20px 60px var(--sh);animation:li .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes li{from{opacity:0;transform:translateY(20px)scale(.96)}to{opacity:1;transform:translateY(0)scale(1)}}
+.l-hex{width:52px;height:52px;background:linear-gradient(135deg,var(--acc),var(--acc3));clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 6px 20px rgba(37,99,235,.35)}
+.l-title{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;text-align:center;letter-spacing:.06em;margin-bottom:3px}
+.l-sub{font-size:11px;color:var(--txt2);text-align:center;margin-bottom:24px}
+.l-lbl{font-size:9px;color:var(--txt2);letter-spacing:.12em;text-transform:uppercase;display:block;font-weight:700;margin-bottom:5px}
+.l-input{width:100%;padding:10px 14px;border-radius:9px;border:1px solid rgba(180,200,240,.5);background:rgba(255,255,255,.75);font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--txt);outline:none;transition:all .15s;margin-bottom:14px}
+.l-input:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.l-roles-lbl{font-size:9px;color:var(--txt2);letter-spacing:.12em;text-transform:uppercase;display:block;font-weight:700;margin-bottom:8px}
+.l-roles{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:22px}
+.role-opt{padding:11px 10px;border-radius:10px;border:1px solid rgba(180,200,240,.4);background:rgba(255,255,255,.6);cursor:pointer;text-align:center;transition:all .15s;position:relative}
+.role-opt:hover{border-color:var(--acc);background:rgba(37,99,235,.05)}
+.role-opt.sel{background:rgba(37,99,235,.1);border-color:rgba(37,99,235,.45);box-shadow:0 0 0 2px rgba(37,99,235,.12)}
+.role-opt .ri{font-size:20px;display:block;margin-bottom:4px}
+.role-opt .rn{font-size:12px;font-weight:700;font-family:'Syne',sans-serif;color:var(--txt)}
+.role-opt .rd{font-size:9px;color:var(--txt3);margin-top:2px;line-height:1.3}
+.role-opt.sel .rn{color:var(--acc)}
+.l-btn{width:100%;padding:13px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--acc),var(--acc3));color:#fff;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;letter-spacing:.06em;cursor:pointer;box-shadow:0 6px 20px rgba(37,99,235,.3);transition:all .2s}
+.l-btn:hover{transform:translateY(-1px);box-shadow:0 8px 26px rgba(37,99,235,.4)}
+.l-note{font-size:10px;color:var(--txt3);text-align:center;margin-top:10px}
+
+/* APP */
+#app{display:none;flex-direction:column;height:100%;position:relative;z-index:1}
+#app.on{display:flex}
+
+/* TOPBAR */
+.topbar{height:52px;flex-shrink:0;background:rgba(255,255,255,.8);backdrop-filter:blur(30px)saturate(2);border-bottom:1px solid var(--brd);box-shadow:0 2px 14px var(--sh2);display:flex;align-items:center;padding:0 18px;gap:12px;z-index:100;position:relative}
+.t-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;letter-spacing:.1em;display:flex;align-items:center;gap:9px}
+.t-hex{width:30px;height:30px;background:linear-gradient(135deg,var(--acc),var(--acc3));clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;font-size:12px;box-shadow:0 3px 10px rgba(37,99,235,.3)}
+.t-logo span{color:var(--acc)}
+.vd{width:1px;height:22px;background:var(--brd2)}
+.tl{font-size:10px;color:var(--txt2);letter-spacing:.07em}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--grn);box-shadow:0 0 8px rgba(5,150,105,.6);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.t-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.uc{display:flex;align-items:center;gap:8px;padding:5px 12px 5px 6px;border-radius:20px;background:rgba(255,255,255,.72);border:1px solid var(--brd2);cursor:pointer}
+.ua{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:700}
+.un{font-size:11px;font-weight:600;color:var(--txt)}
+.rb{font-size:9px;padding:2px 8px;border-radius:10px;font-weight:700;letter-spacing:.06em}
+.rb-admin{background:rgba(124,58,237,.12);color:var(--acc3);border:1px solid rgba(124,58,237,.25)}
+.rb-sre{background:rgba(37,99,235,.12);color:var(--acc);border:1px solid rgba(37,99,235,.25)}
+.rb-noc{background:rgba(8,145,178,.12);color:var(--tea);border:1px solid rgba(8,145,178,.25)}
+.rb-viewer{background:rgba(100,116,139,.1);color:var(--txt2);border:1px solid rgba(100,116,139,.2)}
+.notif-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--brd2);background:rgba(255,255,255,.65);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;position:relative;transition:all .15s}
+.notif-btn:hover{border-color:var(--acc)}
+.ndot{position:absolute;top:5px;right:5px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid #fff;animation:blink 1.5s infinite}
+.logout-btn{padding:5px 12px;border-radius:7px;border:1px solid var(--brd2);background:rgba(255,255,255,.7);color:var(--txt2);font-size:10px;cursor:pointer;font-family:'JetBrains Mono',monospace;transition:all .15s}
+.logout-btn:hover{border-color:var(--red);color:var(--red)}
+
+/* ROLE BANNER */
+.role-banner{padding:6px 18px;font-size:10px;font-weight:600;letter-spacing:.08em;text-align:center;flex-shrink:0}
+.rb-banner-admin{background:rgba(124,58,237,.08);color:var(--acc3);border-bottom:1px solid rgba(124,58,237,.15)}
+.rb-banner-sre{background:rgba(37,99,235,.07);color:var(--acc);border-bottom:1px solid rgba(37,99,235,.15)}
+.rb-banner-noc{background:rgba(8,145,178,.07);color:var(--tea);border-bottom:1px solid rgba(8,145,178,.15)}
+.rb-banner-viewer{background:rgba(100,116,139,.06);color:var(--txt2);border-bottom:1px solid rgba(100,116,139,.12)}
+
+/* LAYOUT */
+.layout{flex:1;display:flex;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{width:230px;flex-shrink:0;background:rgba(255,255,255,.58);backdrop-filter:blur(24px)saturate(1.8);border-right:1px solid var(--brd);box-shadow:2px 0 14px var(--sh2);display:flex;flex-direction:column;padding:12px 0;overflow-y:auto}
+.ns{padding:0 10px;margin-bottom:4px}
+.nl{font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--txt3);padding:8px 10px 4px;font-weight:600}
+.ni{display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:9px;cursor:pointer;font-size:12px;color:var(--txt2);transition:all .15s;margin-bottom:2px;font-weight:600;position:relative;user-select:none}
+.ni:hover{background:rgba(37,99,235,.06);color:var(--txt)}
+.ni.active{background:rgba(37,99,235,.1);color:var(--acc);border:1px solid rgba(37,99,235,.2)}
+.ni.active::before{content:'';position:absolute;left:0;top:6px;bottom:6px;width:3px;background:var(--acc);border-radius:0 2px 2px 0}
+.ni-icon{font-size:14px;width:20px;text-align:center}
+.nbadge{margin-left:auto;font-size:9px;font-weight:700;padding:2px 6px;border-radius:8px}
+.nred{background:rgba(220,38,38,.12);color:var(--red);border:1px solid rgba(220,38,38,.25)}
+.nyel{background:rgba(202,138,4,.1);color:var(--yel);border:1px solid rgba(202,138,4,.2)}
+.ngrn{background:rgba(5,150,105,.1);color:var(--grn);border:1px solid rgba(5,150,105,.2)}
+/* Locked nav item */
+.ni.locked{opacity:.32;cursor:not-allowed;pointer-events:none}
+.ptag{font-size:8px;padding:1px 5px;border-radius:4px;background:rgba(180,200,240,.3);color:var(--txt3);margin-left:auto}
+.sfooter{margin-top:auto;padding:10px 12px;border-top:1px solid rgba(180,200,240,.22)}
+.src-chip{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:6px;font-size:10px;color:var(--txt2);margin-bottom:3px;border:1px solid rgba(180,200,240,.28);background:rgba(255,255,255,.4)}
+.src-dot{width:6px;height:6px;border-radius:50%}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;padding:20px;position:relative;z-index:1}
+.page{display:none}
+.page.active{display:block;animation:fi .25s ease}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* PAGE HEADER */
+.phead{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px}
+.pt{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px}
+.ps{font-size:11px;color:var(--txt3);letter-spacing:.04em}
+.pactions{display:flex;gap:8px;align-items:center;flex-shrink:0}
+
+/* CARDS */
+.card{background:var(--glass);backdrop-filter:blur(20px)saturate(1.6);border:1px solid var(--brd);border-radius:14px;padding:18px;box-shadow:0 4px 20px var(--sh2),0 1px 0 rgba(255,255,255,.85) inset;position:relative;overflow:hidden;transition:box-shadow .2s}
+.card:hover{box-shadow:0 6px 28px var(--sh)}
+.ctitle{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt2);font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:7px}
+
+/* STAT */
+.sg{display:grid;gap:14px;margin-bottom:18px}
+.sg-4{grid-template-columns:repeat(4,1fr)}
+.sg-3{grid-template-columns:repeat(3,1fr)}
+.sg-2{grid-template-columns:repeat(2,1fr)}
+.sc{background:var(--glass);backdrop-filter:blur(20px)saturate(1.6);border:1px solid var(--brd);border-radius:14px;padding:16px 18px;box-shadow:0 4px 20px var(--sh2);position:relative;overflow:hidden}
+.sv{font-size:30px;font-weight:700;font-family:'JetBrains Mono',monospace;line-height:1;margin-bottom:3px}
+.sl{font-size:9px;color:var(--txt2);letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px}
+.ss{font-size:10px;color:var(--txt3)}
+.sglow{position:absolute;top:-10px;right:-10px;width:60px;height:60px;border-radius:50%;opacity:.1;filter:blur(14px)}
+
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px}
+.gm{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px}
+.gm2{display:grid;grid-template-columns:1fr 2fr;gap:16px;margin-bottom:16px}
+
+/* BUTTONS */
+.btn{padding:7px 14px;border-radius:7px;border:1px solid var(--brd2);background:rgba(255,255,255,.72);color:var(--txt2);font-size:11px;cursor:pointer;font-family:'JetBrains Mono',monospace;transition:all .15s;backdrop-filter:blur(6px)}
+.btn:hover{border-color:var(--acc);color:var(--acc);background:rgba(37,99,235,.05)}
+.btn.p{background:rgba(37,99,235,.1);border-color:rgba(37,99,235,.38);color:var(--acc);font-weight:600}
+.btn.p:hover{background:rgba(37,99,235,.18)}
+.btn.g{background:rgba(5,150,105,.1);border-color:rgba(5,150,105,.3);color:var(--grn);font-weight:600}
+.btn.r{background:rgba(220,38,38,.08);border-color:rgba(220,38,38,.28);color:var(--red)}
+.btn.r:hover{background:rgba(220,38,38,.15)}
+.btn:disabled,.btn.disabled{opacity:.35;cursor:not-allowed;pointer-events:none}
+
+/* TAGS */
+.tag{font-size:9px;padding:2px 7px;border-radius:4px;font-weight:600;letter-spacing:.05em;display:inline-block}
+.t-r{background:rgba(220,38,38,.1);color:var(--red);border:1px solid rgba(220,38,38,.2)}
+.t-o{background:rgba(234,88,12,.1);color:var(--ora);border:1px solid rgba(234,88,12,.2)}
+.t-y{background:rgba(202,138,4,.1);color:var(--yel);border:1px solid rgba(202,138,4,.2)}
+.t-g{background:rgba(5,150,105,.1);color:var(--grn);border:1px solid rgba(5,150,105,.2)}
+.t-b{background:rgba(37,99,235,.1);color:var(--acc);border:1px solid rgba(37,99,235,.2)}
+.t-p{background:rgba(124,58,237,.1);color:var(--acc3);border:1px solid rgba(124,58,237,.2)}
+.t-gr{background:rgba(100,116,139,.08);color:var(--txt2);border:1px solid rgba(100,116,139,.18)}
+
+/* ANOMALY ITEMS */
+.aitem{display:flex;align-items:flex-start;gap:11px;padding:11px;border-radius:10px;border:1px solid transparent;cursor:pointer;transition:all .15s;margin-bottom:7px;animation:fi .3s ease}
+.aitem:hover{background:rgba(37,99,235,.03);border-color:rgba(180,200,240,.3)}
+.aitem.d{border-left:3px solid var(--red)}
+.aitem.h{border-left:3px solid var(--ora)}
+.aitem.w{border-left:3px solid var(--yel)}
+.asev{font-size:8px;font-weight:700;padding:3px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;margin-top:1px}
+.sd{background:rgba(220,38,38,.1);color:var(--red);border:1px solid rgba(220,38,38,.25)}
+.sh2b{background:rgba(234,88,12,.1);color:var(--ora);border:1px solid rgba(234,88,12,.25)}
+.sw{background:rgba(202,138,4,.08);color:var(--yel);border:1px solid rgba(202,138,4,.2)}
+.abody{flex:1;min-width:0}
+.aname{font-size:12px;font-weight:700;font-family:'Syne',sans-serif;color:var(--txt);margin-bottom:2px}
+.adesc{font-size:10px;color:var(--txt2);margin-bottom:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ameta{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.sbar{width:48px;height:4px;background:rgba(180,200,240,.25);border-radius:2px;overflow:hidden;margin-top:4px}
+.sfill{height:100%;border-radius:2px}
+
+/* TABLES */
+.tbl{width:100%;border-collapse:collapse;font-size:10px}
+.tbl thead th{position:sticky;top:0;background:rgba(255,255,255,.9);backdrop-filter:blur(10px);padding:7px 10px;text-align:left;font-size:9px;color:var(--txt2);letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid rgba(180,200,240,.35);font-weight:600;white-space:nowrap}
+.tbl tbody tr{border-bottom:1px solid rgba(180,200,240,.12);cursor:pointer;transition:background .1s}
+.tbl tbody tr:hover{background:rgba(37,99,235,.03)}
+.tbl td{padding:5px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
+.tbl tr.ar{background:rgba(220,38,38,.03);border-left:2px solid var(--red)}
+.tbl tr.wr{background:rgba(202,138,4,.03);border-left:2px solid var(--yel)}
+
+/* PROG */
+.pr{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.pl{font-size:10px;color:var(--txt2);min-width:130px}
+.pt2{flex:1;height:6px;background:rgba(180,200,240,.22);border-radius:3px;overflow:hidden}
+.pf{height:100%;border-radius:3px;transition:width .8s}
+.pv{font-size:10px;color:var(--txt2);min-width:36px;text-align:right;font-weight:600}
+
+/* TIMELINE */
+.tl{position:relative;padding-left:22px}
+.tl::before{content:'';position:absolute;left:7px;top:0;bottom:0;width:1px;background:rgba(180,200,240,.4)}
+.tli{position:relative;margin-bottom:14px}
+.tld{position:absolute;left:-18px;top:4px;width:8px;height:8px;border-radius:50%;border:2px solid}
+.tlt{font-size:9px;color:var(--txt3);margin-bottom:2px}
+.tlh{font-size:11px;font-weight:700;margin-bottom:2px;font-family:'Syne',sans-serif}
+.tlb{font-size:10px;color:var(--txt2)}
+
+/* SRE ACTION CARD */
+.ac{background:rgba(255,255,255,.7);backdrop-filter:blur(18px);border:1px solid var(--brd);border-radius:14px;padding:16px;margin-bottom:12px;animation:fi .3s ease}
+.ac-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.ac-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.ac-t{font-size:13px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:2px}
+.ac-s{font-size:10px;color:var(--txt2)}
+.ai-box{background:linear-gradient(135deg,rgba(124,58,237,.07),rgba(37,99,235,.05));border:1px solid rgba(124,58,237,.2);border-radius:10px;padding:12px 14px;margin:10px 0}
+.ai-lbl{font-size:9px;color:var(--acc3);letter-spacing:.12em;margin-bottom:6px;font-weight:700}
+.ai-txt{font-size:11px;color:var(--txt);line-height:1.75}
+
+/* RUNBOOK STEPS */
+.rbs{display:flex;gap:10px;padding:10px 12px;border-radius:8px;margin-bottom:6px;border:1px solid rgba(180,200,240,.25);background:rgba(255,255,255,.5);transition:all .3s}
+.rbs.done{border-color:rgba(5,150,105,.3);background:rgba(5,150,105,.04)}
+.rbs.running{border-color:rgba(37,99,235,.4);background:rgba(37,99,235,.05);animation:pulse-b 1.5s infinite}
+.rbs.waiting{border-color:rgba(202,138,4,.3);background:rgba(202,138,4,.04)}
+.rbs.idle{opacity:.45}
+@keyframes pulse-b{0%,100%{border-color:rgba(37,99,235,.3)}50%{border-color:rgba(37,99,235,.65)}}
+.rbs-num{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px}
+.rbs-body{flex:1}
+.rbs-t{font-size:11px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:2px}
+.rbs-d{font-size:10px;color:var(--txt2)}
+.rbs-badge{font-size:9px;padding:2px 7px;border-radius:4px;margin-top:4px;display:inline-block;font-weight:600}
+
+/* USER ROW */
+.urow{display:flex;align-items:center;gap:11px;padding:10px 14px;border-radius:9px;border:1px solid rgba(180,200,240,.25);background:rgba(255,255,255,.55);margin-bottom:7px;transition:all .15s;cursor:pointer}
+.urow:hover{border-color:rgba(37,99,235,.3);background:rgba(37,99,235,.03)}
+.uav{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.unm{font-size:12px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:2px}
+.uem{font-size:10px;color:var(--txt2)}
+
+/* PERM GRID */
+.pg{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.pi{padding:10px 12px;border-radius:8px;border:1px solid rgba(180,200,240,.25);background:rgba(255,255,255,.55);transition:all .15s}
+.pi.on{border-color:rgba(5,150,105,.35);background:rgba(5,150,105,.05)}
+.pi.off{opacity:.55}
+.pi-n{font-size:10px;font-weight:700;margin-bottom:2px}
+.pi-d{font-size:9px;color:var(--txt2)}
+.toggle{width:34px;height:18px;border-radius:9px;border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.toggle.on{background:var(--grn)}
+.toggle.off{background:rgba(180,200,240,.5)}
+.toggle::after{content:'';position:absolute;top:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.toggle.on::after{left:17px}
+.toggle.off::after{left:2px}
+
+/* CHARTS */
+.bar-ch{display:flex;align-items:flex-end;gap:4px;height:60px}
+.bar{flex:1;border-radius:3px 3px 0 0;min-height:4px;cursor:pointer;transition:all .3s;opacity:.85}
+.bar:hover{opacity:1;filter:brightness(1.1)}
+.svc-r{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.svc-n{font-size:9px;color:var(--txt2);min-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.svc-tr{flex:1;height:7px;background:rgba(180,200,240,.2);border-radius:3px;overflow:hidden}
+.svc-f{height:100%;border-radius:3px;transition:width .5s}
+.svc-v{font-size:9px;min-width:30px;text-align:right;font-weight:600}
+
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(200,215,240,.45);backdrop-filter:blur(16px)saturate(1.5);z-index:5000;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:rgba(255,255,255,.9);backdrop-filter:blur(40px)saturate(2.5);border:1px solid var(--brd);border-radius:16px;width:580px;max-height:82vh;overflow-y:auto;box-shadow:0 20px 60px rgba(90,120,200,.2);animation:mi .22s cubic-bezier(.34,1.56,.64,1)}
+@keyframes mi{from{opacity:0;transform:scale(.94)translateY(12px)}to{opacity:1;transform:scale(1)translateY(0)}}
+.mh{padding:18px 22px 14px;border-bottom:1px solid rgba(180,200,240,.3);display:flex;align-items:flex-start;justify-content:space-between}
+.mb{padding:16px 22px 22px}
+.mclose{background:rgba(180,200,240,.2);border:1px solid rgba(180,200,240,.4);color:var(--txt2);font-size:14px;cursor:pointer;padding:4px 9px;border-radius:6px;line-height:1;transition:all .15s}
+.mclose:hover{background:rgba(220,38,38,.1);color:var(--red);border-color:rgba(220,38,38,.3)}
+.dr{display:flex;gap:8px;margin-bottom:8px}
+.dk{font-size:10px;color:var(--txt2);min-width:130px;padding-top:2px}
+.dv{font-size:11px;color:var(--txt);flex:1;line-height:1.6;font-family:'JetBrains Mono',monospace}
+.divline{height:1px;background:rgba(180,200,240,.3);margin:12px 0}
+
+/* VIEWER LOCKED OVERLAY */
+.locked-overlay{position:absolute;inset:0;background:rgba(255,255,255,.6);backdrop-filter:blur(4px);border-radius:14px;display:flex;align-items:center;justify-content:center;z-index:10}
+.locked-msg{text-align:center;padding:20px}
+.locked-icon{font-size:28px;margin-bottom:8px}
+.locked-t{font-size:13px;font-weight:700;font-family:'Syne',sans-serif;color:var(--txt2);margin-bottom:4px}
+.locked-s{font-size:10px;color:var(--txt3)}
+
+/* NOC READ-ONLY BADGE */
+.readonly-banner{background:rgba(8,145,178,.07);border:1px solid rgba(8,145,178,.2);border-radius:8px;padding:8px 14px;margin-bottom:14px;font-size:10px;color:var(--tea);display:flex;align-items:center;gap:8px}
+
+/* PHASE TAG */
+.phase-tag{font-size:10px;padding:3px 10px;border-radius:6px;background:rgba(180,200,240,.25);color:var(--txt3);border:1px solid rgba(180,200,240,.35)}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{padding:11px 16px;border-radius:10px;font-size:11px;font-weight:600;background:rgba(255,255,255,.95);backdrop-filter:blur(20px);border:1px solid var(--brd);box-shadow:0 8px 24px var(--sh);animation:toast-in .3s cubic-bezier(.34,1.56,.64,1);display:flex;align-items:center;gap:8px;max-width:340px;pointer-events:all}
+@keyframes toast-in{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+.toast.s{border-color:rgba(5,150,105,.3);background:rgba(240,255,248,.97)}
+.toast.e{border-color:rgba(220,38,38,.25);background:rgba(255,242,242,.97)}
+.toast.i{border-color:rgba(37,99,235,.25);background:rgba(240,245,255,.97)}
+.toast.w{border-color:rgba(202,138,4,.25);background:rgba(255,252,235,.97)}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(180,200,240,.5);border-radius:2px}
+</style>
+</head>
+<body>
+<div class="bg"><div class="bb b1"></div><div class="bb b2"></div><div class="bb b3"></div><div class="bb b4"></div><div class="bb b5"></div></div>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="login-screen">
+<div class="lcard">
+  <div class="l-hex">⬡</div>
+  <div class="l-title">NEXUS AIOps</div>
+  <div class="l-sub">Unified AIOps Platform · Bankacılık Operasyon Merkezi</div>
+  <label class="l-lbl">Kullanıcı Adı</label>
+  <input class="l-input" id="l-user" placeholder="kullanıcı adı"/>
+  <label class="l-lbl">Şifre</label>
+  <input class="l-input" type="password" placeholder="şifre"/>
+  <label class="l-roles-lbl">Rol Seçin</label>
+  <div class="l-roles">
+    <div class="role-opt sel" onclick="selRole('admin',this,'soner.yilmaz')">
+      <span class="ri">👑</span><div class="rn">Admin</div>
+      <div class="rd">Tam erişim · Kullanıcı yönetimi · Tüm ayarlar</div>
+    </div>
+    <div class="role-opt" onclick="selRole('sre','ayse.kaya',this)">
+      <span class="ri">🛡️</span><div class="rn">SRE Lead</div>
+      <div class="rd">Anomali + Agent + Runbook · Aksiyon onaylama</div>
+    </div>
+    <div class="role-opt" onclick="selRole('noc',this,'mehmet.demir')">
+      <span class="ri">📊</span><div class="rn">NOC Analyst</div>
+      <div class="rd">Anomali + Log izleme · SRE görüntüleme · Aksiyon yok</div>
+    </div>
+    <div class="role-opt" onclick="selRole('viewer',this,'fatma.celik')">
+      <span class="ri">👁️</span><div class="rn">Viewer</div>
+      <div class="rd">Sadece dashboard ve anomali listesi · Buton yok</div>
+    </div>
+  </div>
+  <button class="l-btn" onclick="doLogin()">🔐 Giriş Yap</button>
+  <div class="l-note">LDAP / Active Directory + Local fallback · Tüm oturumlar audit log'a yazılır</div>
+</div>
+</div>
+
+<!-- ═══ APP ═══ -->
+<div id="app">
+<div class="topbar">
+  <div class="t-logo"><div class="t-hex">⬡</div>NEXUS <span>AIOps</span></div>
+  <div class="vd"></div>
+  <div class="dot"></div>
+  <div class="tl" id="t-ctx">Bankacılık Operasyon Merkezi</div>
+  <div class="vd"></div>
+  <div class="tl" id="t-faz">Faz 1 · Log Anomalisi</div>
+  <div class="t-right">
+    <div class="notif-btn" id="notif-btn" onclick="toggleNotif()">🔔<div class="ndot" id="ndot"></div></div>
+    <div class="uc">
+      <div class="ua" id="u-av">S</div>
+      <div class="un" id="u-nm">soner.yilmaz</div>
+      <div class="rb rb-admin" id="u-rb">Admin</div>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">↩ Çıkış</button>
+  </div>
+</div>
+<div class="role-banner rb-banner-admin" id="role-banner">👑 Admin — Tam erişim · Tüm modüller görünür · Kullanıcı ve rol yönetimi aktif</div>
+
+<div class="layout">
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <!-- filled by buildSidebar() -->
+</div>
+
+<!-- MAIN -->
+<div class="main" id="main-area">
+  <!-- pages filled by buildPages() -->
+</div>
+</div>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="mh"><div><div id="m-badge" style="margin-bottom:6px"></div><div id="m-title" style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--txt)"></div></div>
+    <button class="mclose" onclick="closeModal()">✕</button></div>
+    <div class="mb" id="m-body"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+// ══════════════════════════════════════════════
+// ROLE DEFINITIONS
+// ══════════════════════════════════════════════
+const ROLES_DEF = {
+  admin: {
+    label:'Admin', color:'#7c3aed', rbClass:'rb-admin',
+    bannerClass:'rb-banner-admin',
+    bannerText:'👑 Admin — Tam erişim · Tüm modüller görünür · Kullanıcı ve rol yönetimi aktif',
+    avatarBg:'linear-gradient(135deg,#7c3aed,#2563eb)',
+    notif: true,
+    pages: ['dashboard','anomalies','logstream','errorcodes','sre','runbooks','actions','users','roles','settings'],
+    defaultPage: 'dashboard',
+  },
+  sre: {
+    label:'SRE Lead', color:'#2563eb', rbClass:'rb-sre',
+    bannerClass:'rb-banner-sre',
+    bannerText:'🛡️ SRE Lead — Anomali, Agent, Runbook erişimi aktif · Admin paneli görünmüyor',
+    avatarBg:'linear-gradient(135deg,#2563eb,#0891b2)',
+    notif: true,
+    pages: ['dashboard','anomalies','logstream','errorcodes','sre','runbooks','actions'],
+    defaultPage: 'dashboard',
+  },
+  noc: {
+    label:'NOC Analyst', color:'#0891b2', rbClass:'rb-noc',
+    bannerClass:'rb-banner-noc',
+    bannerText:'📊 NOC Analyst — Log ve anomali izleme · SRE bölümü sadece görüntüleme · Aksiyon başlatma yetkisi yok',
+    avatarBg:'linear-gradient(135deg,#0891b2,#059669)',
+    notif: true,
+    pages: ['dashboard','anomalies','logstream','errorcodes','sre_readonly','runbooks_readonly'],
+    defaultPage: 'dashboard',
+  },
+  viewer: {
+    label:'Viewer', color:'#94a3b8', rbClass:'rb-viewer',
+    bannerClass:'rb-banner-viewer',
+    bannerText:'👁️ Viewer — Sadece dashboard ve anomali listesi · Düzenleme, aksiyon ve ayarlar kilitli',
+    avatarBg:'linear-gradient(135deg,#94a3b8,#64748b)',
+    notif: false,
+    pages: ['dashboard_readonly','anomalies_readonly'],
+    defaultPage: 'dashboard_readonly',
+  },
+};
+
+// ══════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════
+const ANOMALIES = [
+  {id:1,sev:'d',title:'DB-CLUSTER-02 — Sorgu Gecikmesi',desc:'SELECT avg=4.820ms (baz:180ms) — 26.8x normal · Z=6.3σ',src:'Logstash',svc:'EFT_DOMESTIC_TRANSFER',type:'Süre',score:0.97,time:'14:22:05',rc:1002,rd:'Veritabanı zaman aşımı',rcat:'SYS',algo:'Z-Score 6.3σ',ai:'Yüksek olasılıkla (%94) DB-CLUSTER-02 üzerinde tablo kilidi veya indeks bozulması. APP-CORE-01 sorgu kuyruğu dolmakta. Önerilen: SHOW PROCESSLIST çalıştır, uzun süren sorguları öldür, pg_stat_activity kontrol et.'},
+  {id:2,sev:'d',title:'Kanal 747 (Mobil) — Hata Spike',desc:'Hata oranı %28.4 (baz:%3.1) · Z=4.2σ · 47 işlem etkilendi',src:'Logstash',svc:'OVD_BAAS_GET_PRE_APPROVED_LIMIT',type:'Kanal',score:0.95,time:'14:23:01',rc:7503,rd:'Yetersiz bakiye - EFT',rcat:'BIZ',algo:'Z-Score 4.2σ',ai:'Mobil kanaldan gelen limit sorgularında iş hatası patlaması. Backend konfigürasyonu değişmiş veya DB\'de eksik kayıt var. Şube ve internet kanalları normal.'},
+  {id:3,sev:'d',title:'APP-CORE-01 — CPU + OOM',desc:'CPU %98.7 · Load avg 42.3 · OOM log spike 89/dk',src:'Logstash',svc:'Tüm Servisler',type:'Servis',score:0.93,time:'14:23:45',rc:1020,rd:'Bellek yetersiz - GC overhead',rcat:'SYS',algo:'Kural + Z-Score',ai:'JVM heap tükenmiş. GC döngüleri başarısız. DB gecikmeyle tetiklenen thread pool doygunluğu. Aksiyon: heap dump al → cache temizle → restart.'},
+  {id:4,sev:'d',title:'EFT — Hata Kodu Spike',desc:'result=1002 (DB timeout): 342/dk (baz:8/dk) · 42x artış',src:'Logstash',svc:'EFT_DOMESTIC_TRANSFER',type:'Hata Kodu',score:0.91,time:'14:24:10',rc:1002,rd:'Veritabanı zaman aşımı',rcat:'SYS',algo:'Kural Motoru',ai:'DB timeout hataları EFT servisini çökertiyor. SYS kategorisi (1002 < 7500). 1.842 başarısız işlem. Regülasyon bildirimi gerekebilir.'},
+  {id:5,sev:'h',title:'CARD_PAYMENT — CVV Hata Artışı',desc:'result 7552: %18 (baz:%1.2) · Fraud pattern şüphesi',src:'Logstash',svc:'CARD_PAYMENT_AUTHORIZATION',type:'Hata Kodu',score:0.76,time:'14:25:02',rc:7552,rd:'CVV hatalı',rcat:'BIZ',algo:'Z-Score 3.8σ',ai:'BIZ kategorisi kart ödemelerinde CVV hatası artışı. Olası fraud pattern. Güvenlik ekibine bildirilmeli.'},
+  {id:6,sev:'h',title:'BILL_PAYMENT — Servis Down',desc:'İşlem sayısı 0 — 5dk boyunca sıfır tx',src:'Logstash',svc:'BILL_PAYMENT_EXECUTE',type:'Servis',score:0.74,time:'14:25:20',rc:1010,rd:'Servis yanıt vermedi',rcat:'SYS',algo:'Kural (0 tx)',ai:'Fatura ödeme servisi yanıt vermiyor. Downstream bağımlılık veya deploy sorunu olabilir.'},
+  {id:7,sev:'w',title:'LOAN_INSTALLMENT — Yavaşlama',desc:'Elapsed p99: 3.200ms (baz:180ms) · Z=4.8σ',src:'Logstash',svc:'LOAN_INSTALLMENT_QUERY',type:'Süre',score:0.58,time:'14:27:10',rc:7531,rd:'Taksit sayısı geçersiz',rcat:'BIZ',algo:'Z-Score 4.8σ',ai:'Kredi taksit sorgularında gecikme. DB bağlantı havuzunun dolmasından kaynaklanan ikincil etki.'},
+];
+
+const SRE_PENDING = [
+  {id:'A001',title:'APP-CORE-01 — Servis Restart',sev:'d',desc:'OOM + CPU %98 → Heap dump ve cache temizleme tamamlandı, restart onay bekliyor',steps:['✅ Heap dump alındı (2.1GB → /tmp/)','✅ Spring cache flush tamamlandı','⏳ systemctl restart app-core — ONAY BEKLİYOR'],zbx:'ZBX-10042',itsm:'INC-2026-04891',ai:'JVM heap doldu, GC loop başarısız. Cache temizleme yeterli olmadı. Servis restart gerekli. ~30 saniyelik downtime bekleniyor. Etkilenecek kullanıcı sayısı: tahminen 0 (maintenance window açık).'},
+  {id:'A002',title:'DB-CLUSTER-02 — Idle Conn Kill',sev:'h',desc:'498/500 bağlantı dolu → Idle bağlantı temizleme önerildi',steps:['✅ Pool istatistikleri alındı (498/500 dolu)','⏳ pg_terminate_backend(idle) — ONAY BEKLİYOR'],zbx:'ZBX-10043',itsm:'INC-2026-04892',ai:'PgBouncer havuzu tükendi. Idle bağlantıları öldürmek servisleri etkilemez. Aktif sorgu bulunmuyor. Risk: düşük.'},
+];
+
+const SRE_AUTO = [
+  {title:'Slack Bildirimi',desc:'#sre-alerts — 3 kritik anomali',time:'14:24:15',icon:'💬',done:true},
+  {title:'JIRA INC-2026-04891',desc:'DB-CLUSTER-02 yavaşlama ticket açıldı',time:'14:23:55',icon:'🎫',done:true},
+  {title:'Zabbix Maintenance',desc:'DB-CLUSTER-02 · 30dk maintenance window',time:'14:22:30',icon:'🔧',done:true},
+  {title:'Heap Dump Alındı',desc:'APP-CORE-01 · /tmp/heap-20260408.hprof (2.1GB)',time:'14:22:05',icon:'💾',done:true},
+];
+
+const AUDIT_LOG = [
+  {time:'14:24:15',action:'Slack Bildirimi',target:'#sre-alerts',karar:'Otomatik',by:'Agent',sonuc:'✅'},
+  {time:'14:23:55',action:'JIRA Ticket Aç',target:'INC-2026-04891',karar:'Otomatik',by:'Agent',sonuc:'✅'},
+  {time:'14:22:30',action:'Zabbix Maintenance',target:'DB-CLUSTER-02',karar:'Otomatik',by:'Agent',sonuc:'✅'},
+  {time:'14:22:05',action:'Heap Dump Al',target:'APP-CORE-01',karar:'Otomatik',by:'Agent',sonuc:'✅'},
+  {time:'13:45:12',action:'Servis Restart',target:'WORKER-03',karar:'Onaylandı',by:'ayse.kaya',sonuc:'✅'},
+  {time:'12:30:08',action:'Idle Conn Kill',target:'DB-CLUSTER-01',karar:'Reddedildi',by:'mehmet.demir',sonuc:'❌'},
+];
+
+const USERS_DATA = [
+  {nm:'Soner Yılmaz',em:'soner.yilmaz@bank',roles:['Admin'],auth:'LDAP',av:'SY',col:'#7c3aed',last:'Az önce'},
+  {nm:'Ayşe Kaya',em:'ayse.kaya@bank',roles:['SRE Lead'],auth:'LDAP',av:'AK',col:'#2563eb',last:'5 dk önce'},
+  {nm:'Mehmet Demir',em:'mehmet.demir@bank',roles:['SRE Lead'],auth:'LDAP',av:'MD',col:'#2563eb',last:'1 sa önce'},
+  {nm:'Fatma Çelik',em:'fatma.celik@bank',roles:['NOC Analyst'],auth:'LDAP',av:'FÇ',col:'#0891b2',last:'2 sa önce'},
+  {nm:'Ali Yıldız',em:'ali.yildiz@bank',roles:['Viewer'],auth:'Local',av:'AY',col:'#94a3b8',last:'Dün'},
+];
+
+const ERROR_CODES_DATA = [
+  {code:0,desc:'Başarılı',cat:'SUCCESS',cnt:642847,up:false},
+  {code:1002,desc:'Veritabanı zaman aşımı',cat:'SYS',cnt:342,up:true},
+  {code:1010,desc:'Servis yanıt vermedi',cat:'SYS',cnt:87,up:true},
+  {code:1012,desc:'Circuit breaker açık',cat:'SYS',cnt:156,up:true},
+  {code:2002,desc:'Oturum süresi doldu',cat:'SYS',cnt:234,up:false},
+  {code:7503,desc:'Yetersiz bakiye - EFT',cat:'BIZ',cnt:1842,up:false},
+  {code:7520,desc:'Alıcı hesap bulunamadı',cat:'BIZ',cnt:923,up:false},
+  {code:7552,desc:'CVV hatalı',cat:'BIZ',cnt:412,up:true},
+];
+
+const PERMISSIONS_DATA = {
+  sre: [
+    {nm:'log.anomalies.view',desc:'Anomali listesini gör',on:true},
+    {nm:'log.anomalies.ack',desc:'Anomaliyi onayla',on:true},
+    {nm:'log.config.edit',desc:'Log config düzenle',on:true},
+    {nm:'sre.actions.view',desc:'Aksiyon geçmişi',on:true},
+    {nm:'sre.actions.approve',desc:'Aksiyon onayla',on:true},
+    {nm:'sre.runbooks.edit',desc:'Runbook düzenle',on:true},
+    {nm:'admin.users.view',desc:'Kullanıcıları gör',on:false},
+    {nm:'admin.roles.edit',desc:'Rol düzenle',on:false},
+  ],
+  noc: [
+    {nm:'log.anomalies.view',desc:'Anomali listesini gör',on:true},
+    {nm:'log.anomalies.ack',desc:'Anomaliyi onayla',on:false},
+    {nm:'log.config.edit',desc:'Log config düzenle',on:false},
+    {nm:'sre.actions.view',desc:'Aksiyon geçmişi',on:true},
+    {nm:'sre.actions.approve',desc:'Aksiyon onayla',on:false},
+    {nm:'sre.runbooks.edit',desc:'Runbook düzenle',on:false},
+    {nm:'admin.users.view',desc:'Kullanıcıları gör',on:false},
+    {nm:'admin.roles.edit',desc:'Rol düzenle',on:false},
+  ],
+  viewer: [
+    {nm:'log.anomalies.view',desc:'Anomali listesini gör',on:true},
+    {nm:'log.anomalies.ack',desc:'Anomaliyi onayla',on:false},
+    {nm:'log.config.edit',desc:'Log config düzenle',on:false},
+    {nm:'sre.actions.view',desc:'Aksiyon geçmişi',on:false},
+    {nm:'sre.actions.approve',desc:'Aksiyon onayla',on:false},
+    {nm:'sre.runbooks.edit',desc:'Runbook düzenle',on:false},
+    {nm:'admin.users.view',desc:'Kullanıcıları gör',on:false},
+    {nm:'admin.roles.edit',desc:'Rol düzenle',on:false},
+  ],
+};
+
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+let currentRole = 'admin';
+let currentUser = 'soner.yilmaz';
+let logInterval = null;
+let logPaused = false;
+let lsTotal = 0, lsErr = 0;
+let pendingActions = [...SRE_PENDING];
+let notifOpen = false;
+
+// ══════════════════════════════════════════════
+// LOGIN
+// ══════════════════════════════════════════════
+const ROLE_USERS = {admin:'soner.yilmaz',sre:'ayse.kaya',noc:'mehmet.demir',viewer:'fatma.celik'};
+
+function selRole(role, el, username) {
+  document.querySelectorAll('.role-opt').forEach(e=>e.classList.remove('sel'));
+  el.classList.add('sel');
+  currentRole = role;
+  document.getElementById('l-user').value = ROLE_USERS[role];
+}
+
+function doLogin() {
+  const rd = ROLES_DEF[currentRole];
+  currentUser = document.getElementById('l-user').value || ROLE_USERS[currentRole];
+  const ls = document.getElementById('login-screen');
+  ls.style.transition = 'all .4s ease';
+  ls.style.opacity = '0';
+  ls.style.transform = 'scale(1.04)';
+  setTimeout(()=>{
+    ls.style.display = 'none';
+    const app = document.getElementById('app');
+    app.classList.add('on');
+    // Update topbar
+    document.getElementById('u-av').textContent = currentUser.slice(0,2).toUpperCase();
+    document.getElementById('u-av').style.background = rd.avatarBg;
+    document.getElementById('u-nm').textContent = currentUser;
+    const rb = document.getElementById('u-rb');
+    rb.textContent = rd.label;
+    rb.className = `rb ${rd.rbClass}`;
+    document.getElementById('role-banner').textContent = rd.bannerText;
+    document.getElementById('role-banner').className = `role-banner ${rd.bannerClass}`;
+    document.getElementById('ndot').style.display = rd.notif ? 'block' : 'none';
+    buildSidebar();
+    buildPages();
+    showPage(rd.defaultPage);
+    toast(`Hoş geldiniz ${currentUser} · ${rd.label} rolüyle giriş yapıldı`, 'i');
+    if(currentRole === 'viewer') setTimeout(()=>toast('ℹ️ Görüntüleyici modunda · Düzenleme ve aksiyon yetkiniz yok','w'),1200);
+    if(currentRole === 'noc') setTimeout(()=>toast('📊 NOC Analyst · SRE bölümü sadece görüntüleme','i'),1200);
+    if(currentRole === 'sre') setTimeout(()=>toast(`🛡️ SRE Lead · ${pendingActions.length} aksiyon onayınızı bekliyor`,'w'),1200);
+    if(currentRole === 'admin') setTimeout(()=>toast('👑 Admin paneli · Tüm modüller ve yönetim araçları aktif','s'),1200);
+  }, 420);
+}
+
+function doLogout() {
+  if(logInterval){clearInterval(logInterval);logInterval=null;}
+  lsTotal=0;lsErr=0;
+  const app = document.getElementById('app');
+  app.classList.remove('on');
+  const ls = document.getElementById('login-screen');
+  ls.style.display = 'flex';
+  ls.style.opacity = '0';
+  ls.style.transform = 'scale(.96)';
+  setTimeout(()=>{ls.style.opacity='1';ls.style.transform='scale(1)';},50);
+  pendingActions = [...SRE_PENDING];
+}
+
+// ══════════════════════════════════════════════
+// SIDEBAR BUILDER — role based
+// ══════════════════════════════════════════════
+function buildSidebar() {
+  const R = currentRole;
+  let html = '';
+
+  // Genel
+  html += `<div class="ns"><div class="nl">Genel</div>
+    <div class="ni" id="nav-dashboard" onclick="showPage('${R==='viewer'?'dashboard_readonly':'dashboard'}',this)"><span class="ni-icon">◈</span>Dashboard</div>
+  </div>`;
+
+  // Faz 1
+  html += `<div class="ns"><div class="nl">Faz 1 — Log Anomalisi</div>`;
+  if(R!=='viewer'){
+    html += `<div class="ni" id="nav-anomalies" onclick="showPage('anomalies',this)"><span class="ni-icon">⚡</span>Anomaliler<span class="nbadge nred">7</span></div>`;
+    html += `<div class="ni" id="nav-logstream" onclick="showPage('logstream',this)"><span class="ni-icon">≡</span>Log Akışı</div>`;
+    html += `<div class="ni" id="nav-errorcodes" onclick="showPage('errorcodes',this)"><span class="ni-icon">🔢</span>Hata Kodları</div>`;
+  } else {
+    html += `<div class="ni" id="nav-anomalies" onclick="showPage('anomalies_readonly',this)"><span class="ni-icon">⚡</span>Anomaliler<span class="nbadge nred">7</span></div>`;
+    html += `<div class="ni locked"><span class="ni-icon">≡</span>Log Akışı<span class="ptag">🔒</span></div>`;
+    html += `<div class="ni locked"><span class="ni-icon">🔢</span>Hata Kodları<span class="ptag">🔒</span></div>`;
+  }
+  html += `</div>`;
+
+  // SRE
+  html += `<div class="ns"><div class="nl">SRE Agent</div>`;
+  if(R==='admin'||R==='sre'){
+    const pb = pendingActions.length;
+    html += `<div class="ni" id="nav-sre" onclick="showPage('sre',this)"><span class="ni-icon">🤖</span>Agent Merkezi${pb?`<span class="nbadge nyel">${pb}</span>`:'<span class="nbadge ngrn">✓</span>'}</div>`;
+    html += `<div class="ni" id="nav-runbooks" onclick="showPage('runbooks',this)"><span class="ni-icon">📋</span>Runbook'lar</div>`;
+    html += `<div class="ni" id="nav-actions" onclick="showPage('actions',this)"><span class="ni-icon">📜</span>Aksiyon Geçmişi</div>`;
+  } else if(R==='noc'){
+    html += `<div class="ni" id="nav-sre" onclick="showPage('sre_readonly',this)"><span class="ni-icon">🤖</span>Agent<span class="ptag">👁</span></div>`;
+    html += `<div class="ni" id="nav-runbooks" onclick="showPage('runbooks_readonly',this)"><span class="ni-icon">📋</span>Runbook'lar<span class="ptag">👁</span></div>`;
+    html += `<div class="ni locked"><span class="ni-icon">📜</span>Aksiyon Geçmişi<span class="ptag">🔒</span></div>`;
+  } else {
+    html += `<div class="ni locked"><span class="ni-icon">🤖</span>Agent<span class="ptag">🔒</span></div>`;
+    html += `<div class="ni locked"><span class="ni-icon">📋</span>Runbook'lar<span class="ptag">🔒</span></div>`;
+  }
+  html += `</div>`;
+
+  // İleride
+  html += `<div class="ns"><div class="nl">İleride Gelecek</div>
+    <div class="ni locked"><span class="ni-icon">📈</span>Metrik Anomalisi<span class="ptag">Faz 2</span></div>
+    <div class="ni locked"><span class="ni-icon">⬡</span>Topoloji<span class="ptag">Faz 3</span></div>
+    <div class="ni locked"><span class="ni-icon">🔗</span>Korelasyon<span class="ptag">Faz 5</span></div>
+  </div>`;
+
+  // Admin only
+  if(R==='admin'){
+    html += `<div class="ns"><div class="nl">Yönetim</div>
+      <div class="ni" id="nav-users" onclick="showPage('users',this)"><span class="ni-icon">👥</span>Kullanıcılar</div>
+      <div class="ni" id="nav-roles" onclick="showPage('roles',this)"><span class="ni-icon">🔑</span>Rol & İzinler</div>
+      <div class="ni" id="nav-settings" onclick="showPage('settings',this)"><span class="ni-icon">⚙️</span>Sistem Ayarları</div>
+    </div>`;
+  }
+
+  html += `<div class="sfooter">
+    <div style="font-size:9px;color:var(--txt3);letter-spacing:.08em;margin-bottom:6px;font-weight:600;text-transform:uppercase">Veri Kaynakları</div>
+    <div class="src-chip"><div class="src-dot" style="background:var(--grn);box-shadow:0 0 5px var(--grn)"></div>Logstash Push</div>
+    <div class="src-chip"><div class="src-dot" style="background:var(--grn);box-shadow:0 0 5px var(--grn)"></div>LLM Servisi</div>
+    <div class="src-chip"><div class="src-dot" style="background:var(--grn);box-shadow:0 0 5px var(--grn)"></div>Zabbix API</div>
+    <div class="src-chip"><div class="src-dot" style="background:var(--yel);box-shadow:0 0 5px var(--yel)"></div>JIRA ITSM</div>
+  </div>`;
+
+  document.getElementById('sidebar').innerHTML = html;
+}
+
+// ══════════════════════════════════════════════
+// PAGE BUILDER — role based
+// ══════════════════════════════════════════════
+function buildPages() {
+  const R = currentRole;
+  const main = document.getElementById('main-area');
+  main.innerHTML = buildDashboard(R)
+    + buildAnomaliesPage(R)
+    + buildLogStream(R)
+    + buildErrorCodes(R)
+    + buildSREPage(R)
+    + buildRunbooksPage(R)
+    + buildActionsPage(R)
+    + buildUsersPage(R)
+    + buildRolesPage(R)
+    + buildSettingsPage(R);
+}
+
+// ── DASHBOARD ──
+function buildDashboard(R) {
+  const isViewer = R==='viewer';
+  const readonly = isViewer ? '_readonly' : '';
+  const statsExtra = R==='viewer' ? `
+    <div class="sc2" style="border:2px dashed rgba(180,200,240,.5);background:rgba(180,200,240,.1)">
+      <div class="locked-overlay" style="position:relative;inset:auto;background:none;backdrop-filter:none;border-radius:0;padding:0">
+        <div style="text-align:center"><div style="font-size:22px">🔒</div><div style="font-size:10px;color:var(--txt3)">SRE verisi kilitli</div></div>
+      </div>
+    </div>` : `<div class="sc2"><div class="sglow" style="background:var(--yel)"></div><div class="sv" style="color:var(--yel)">${pendingActions.length}</div><div class="sl">Onay Bekleyen</div><div class="ss">SRE Agent aksiyonu</div></div>`;
+  return `<div class="page" id="page-dashboard${readonly}">
+    <div class="phead">
+      <div><div class="pt">Operasyon Merkezi</div><div class="ps">Faz 1 aktif · ${isViewer?'Görüntüleme modu':'SRE Agent aktif'} · Gerçek zamanlı</div></div>
+      ${!isViewer?`<div class="pactions"><button class="btn">↓ Rapor</button>${R==='admin'?`<button class="btn p">+ Kural Ekle</button>`:''}</div>`:''}
+    </div>
+    <div class="sg sg-4">
+      <div class="sc2"><div class="sglow" style="background:var(--red)"></div><div class="sv" style="color:var(--red)">7</div><div class="sl">Aktif Anomali</div><div class="ss" style="color:var(--red)">↑ 3 son 15dk'da</div></div>
+      ${statsExtra}
+      <div class="sc2"><div class="sglow" style="background:var(--grn)"></div><div class="sv" style="color:var(--grn)">98.2<span style="font-size:16px">%</span></div><div class="sl">Genel Sağlık</div><div class="ss">↓ 0.3% düşüş</div></div>
+      <div class="sc2"><div class="sglow" style="background:var(--acc)"></div><div class="sv" style="color:var(--acc)">700k</div><div class="sl">Tx/Gün</div><div class="ss">~8 tx/sn</div></div>
+    </div>
+    <div class="gm">
+      <div class="card">
+        <div class="ctitle">⚡ Son Anomaliler</div>
+        ${anomListHtml(ANOMALIES.slice(0,5), R, true)}
+      </div>
+      <div>
+        ${R!=='viewer'?`<div class="card" style="margin-bottom:14px">
+          <div class="ctitle">📊 Kanal Hata Oranları</div>
+          <div class="bar-ch" id="dash-ch-bars">
+            ${[0.28,0.05,0.35,0.03,0.04,0.02].map((r,i)=>`<div class="bar" style="height:${Math.max(5,r/0.35*100)}%;background:${r>0.15?'var(--red)':r>0.05?'var(--ora)':'var(--acc)'}" title="${Object.values({747:'Mobil',101:'İnternet',201:'Şube',301:'ATM',401:'Çağrı',501:'Batch'})[i]}: %${(r*100).toFixed(0)}"></div>`).join('')}
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:8px;color:var(--txt3)"><span>747</span><span>101</span><span>201</span><span>301</span><span>401</span><span>501</span></div>
+        </div>`:''}
+        <div class="card">
+          <div class="ctitle">🕒 Olay Akışı</div>
+          <div class="tl">
+            ${[{t:'14:24:33',h:'LLM Analizi Tamamlandı',b:'APP-CORE-01 OOM — restart önerisi',c:'var(--acc3)'},
+               {t:'14:24:15',h:'Slack Bildirimi',b:'#sre-alerts — kritik anomali',c:'var(--acc)'},
+               {t:'14:23:55',h:'JIRA INC-2026-04891',b:'DB-CLUSTER-02 yavaşlama',c:'var(--acc3)'},
+               {t:'14:22:05',h:'İlk Anomali',b:'DB sorgu gecikmesi z=6.3σ',c:'var(--red)'}
+              ].map(e=>`<div class="tli"><div class="tld" style="background:${e.c};border-color:${e.c}"></div><div class="tlt">${e.t}</div><div class="tlh" style="color:${e.c};font-size:10px">${e.h}</div><div class="tlb">${e.b}</div></div>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── ANOMALIES ──
+function anomListHtml(list, role, compact=false) {
+  return list.map(a=>{
+    const sw = Math.round(a.score*100);
+    const sc = a.score>0.85?'var(--red)':a.score>0.7?'var(--ora)':'var(--yel)';
+    const sevL = {d:'KRİTİK',h:'YÜKSEK',w:'UYARI'}[a.sev];
+    const sevCls = {d:'sd',h:'sh2b',w:'sw'}[a.sev];
+    const canClick = role!=='viewer';
+    return `<div class="aitem ${a.sev}" ${canClick?`onclick="openAnomModal(${a.id})"`:'style="cursor:default"'}>
+      <div>
+        <div class="asev ${sevCls}">${sevL}</div>
+        <div style="margin-top:5px;font-size:11px;font-family:'JetBrains Mono',monospace;color:${sc};text-align:center;font-weight:700">${sw}</div>
+        <div class="sbar"><div class="sfill" style="width:${sw}%;background:${sc}"></div></div>
+      </div>
+      <div class="abody">
+        <div class="aname">${a.title}</div>
+        <div class="adesc">${a.desc}</div>
+        <div class="ameta">
+          <span class="tag t-b">${a.type}</span>
+          <span class="tag ${a.rcat==='SYS'?'t-o':'t-r'}">${a.rcat}: ${a.rd}</span>
+          <span style="font-size:9px;color:var(--txt3)">${a.time}</span>
+          ${canClick?'<span style="font-size:9px;color:var(--acc)">→ detay</span>':''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function buildAnomaliesPage(R) {
+  const isViewer = R==='viewer';
+  const pid = isViewer ? 'page-anomalies_readonly' : 'page-anomalies';
+  const filterBtns = !isViewer ? `<div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+    <button class="btn p" onclick="filterAnoms('all',this)">Tümü (${ANOMALIES.length})</button>
+    <button class="btn" onclick="filterAnoms('d',this)">Kritik (${ANOMALIES.filter(a=>a.sev==='d').length})</button>
+    <button class="btn" onclick="filterAnoms('h',this)">Yüksek (${ANOMALIES.filter(a=>a.sev==='h').length})</button>
+    <button class="btn" onclick="filterAnoms('w',this)">Uyarı (${ANOMALIES.filter(a=>a.sev==='w').length})</button>
+    ${R==='admin'?`<div style="flex:1"></div><button class="btn p">+ Kural Ekle</button>`:R==='sre'?`<div style="flex:1"></div><button class="btn" onclick="toast('Dışa aktarma başlatıldı','s')">↓ Dışa Aktar</button>`:''}
+  </div>` : `<div style="background:rgba(100,116,139,.07);border:1px solid rgba(100,116,139,.2);border-radius:8px;padding:8px 14px;margin-bottom:14px;font-size:10px;color:var(--txt2);display:flex;align-items:center;gap:8px">👁️ Görüntüleme modu — Anomali detaylarını görmek için SRE veya Admin rolü gereklidir</div>`;
+  return `<div class="page" id="${pid}">
+    <div class="phead">
+      <div><div class="pt">Anomali Merkezi</div><div class="ps">Log tabanlı · Z-Score + IF + Kural Motoru · Hata kodu zenginleştirmesi</div></div>
+    </div>
+    ${filterBtns}
+    <div id="anom-list">${anomListHtml(ANOMALIES, R)}</div>
+  </div>`;
+}
+
+// ── LOG STREAM ──
+function buildLogStream(R) {
+  if(R==='viewer') return '<div class="page" id="page-logstream_viewer"></div>';
+  const canConfig = R==='admin';
+  return `<div class="page" id="page-logstream">
+    <div class="phead">
+      <div><div class="pt">Log Akışı</div><div class="ps">Logstash HTTP push · Batch 500 · Anomali vurgulama · Hata açıklamaları</div></div>
+      <div class="pactions">
+        <button class="btn" id="ls-pause-btn" onclick="toggleLogPause(this)">⏸ Durdur</button>
+        ${canConfig?`<button class="btn p">⚙ Konfigürasyon</button>`:''}
+      </div>
+    </div>
+    <div class="sg sg-3" style="margin-bottom:14px">
+      <div class="sc"><div class="sv" style="color:var(--acc);font-size:22px" id="ls-total">0</div><div class="sl">Toplam Tx</div></div>
+      <div class="sc"><div class="sv" style="color:var(--red);font-size:22px" id="ls-err">0</div><div class="sl">Hata (result≠0)</div></div>
+      <div class="sc"><div class="sv" style="color:var(--yel);font-size:22px" id="ls-rate">%0</div><div class="sl">Hata Oranı</div></div>
+    </div>
+    <div class="card"><div class="ctitle">≡ Canlı Akış <span class="tag t-g">● CANLI</span></div>
+      <div style="overflow:auto;max-height:440px"><table class="tbl">
+        <thead><tr><th>Zaman</th><th>Kanal</th><th>Servis</th><th>Elapsed</th><th>Result</th><th>Açıklama</th></tr></thead>
+        <tbody id="log-tbody"></tbody>
+      </table></div>
+    </div>
+  </div>`;
+}
+
+// ── ERROR CODES ──
+function buildErrorCodes(R) {
+  if(R==='viewer') return '';
+  const canUpload = R==='admin';
+  const rows = ERROR_CODES_DATA.map(e=>{
+    const cc = e.cat==='SUCCESS'?'t-g':e.cat==='SYS'?'t-o':'t-r';
+    return `<tr><td style="font-weight:700;color:${e.cat==='SYS'?'var(--ora)':e.cat==='BIZ'?'var(--red)':'var(--grn)'}">${e.code}</td><td>${e.desc}</td><td><span class="tag ${cc}">${e.cat}</span></td><td style="font-weight:700">${e.cnt.toLocaleString()}</td><td>${e.up?'<span style="color:var(--red);font-weight:700">↑</span>':'<span style="color:var(--grn)">→</span>'}</td></tr>`;
+  }).join('');
+  return `<div class="page" id="page-errorcodes">
+    <div class="phead"><div><div class="pt">Hata Kodu Sözlüğü</div><div class="ps">error_codes.csv → PostgreSQL → RAM cache</div></div>
+    ${canUpload?`<div class="pactions"><button class="btn p" onclick="toast('CSV yükleme başlatıldı','s')">↑ CSV Güncelle</button></div>`:''}
+    </div>
+    <div class="sg sg-3" style="margin-bottom:14px">
+      <div class="sc"><div class="sv" style="color:var(--acc);font-size:22px">42</div><div class="sl">Toplam Kod</div></div>
+      <div class="sc"><div class="sv" style="color:var(--ora);font-size:22px">18</div><div class="sl">Sistem Hatası</div><div class="ss">result 1–7499</div></div>
+      <div class="sc"><div class="sv" style="color:var(--red);font-size:22px">24</div><div class="sl">İş Hatası</div><div class="ss">result 7500+</div></div>
+    </div>
+    <div class="card"><div class="ctitle">🔢 Hata Kodları</div>
+      <div style="overflow:auto;max-height:440px"><table class="tbl">
+        <thead><tr><th>Kod</th><th>Açıklama</th><th>Kategori</th><th>Son 24s</th><th>Trend</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+    </div>
+  </div>`;
+}
+
+// ── SRE PAGE ──
+function buildSREPage(R) {
+  // READONLY for NOC
+  if(R==='noc'){
+    return `<div class="page" id="page-sre_readonly">
+      <div class="phead"><div><div class="pt">SRE Agent</div><div class="ps">Görüntüleme modu · Aksiyon başlatma yetkisi yok</div></div></div>
+      <div class="readonly-banner">👁️ NOC Analyst rolü SRE bölümünü sadece görüntüleyebilir. Aksiyon onaylamak veya başlatmak için SRE Lead veya Admin rolü gereklidir.</div>
+      <div class="sg sg-4">
+        <div class="sc"><div class="sv" style="color:var(--yel);font-size:24px">${pendingActions.length}</div><div class="sl">Onay Bekleyen</div></div>
+        <div class="sc"><div class="sv" style="color:var(--grn);font-size:24px">14</div><div class="sl">Otomatik Yapıldı</div></div>
+        <div class="sc"><div class="sv" style="color:var(--acc);font-size:24px">3</div><div class="sl">Çalışıyor</div></div>
+        <div class="sc"><div class="sv" style="color:var(--txt2);font-size:24px">8</div><div class="sl">Reddedildi</div></div>
+      </div>
+      <div class="card"><div class="ctitle">⏳ Onay Bekleyen Aksiyonlar (Salt Okunur)</div>
+        ${pendingActions.map(a=>`<div class="ac" style="opacity:.7;pointer-events:none">
+          <div class="ac-head"><div class="ac-icon" style="background:rgba(220,38,38,.1)">${a.sev==='d'?'🔴':'🟠'}</div>
+          <div><div class="ac-t">${a.title}</div><div class="ac-s">${a.desc}</div></div>
+          <div style="margin-left:auto"><span class="tag t-y">Onay Bekliyor</span></div></div>
+          <div style="font-size:10px;color:var(--txt2);margin-bottom:8px">${a.steps.map(s=>`<div style="padding:2px 0">• ${s}</div>`).join('')}</div>
+          <div style="display:flex;gap:8px">
+            <button class="btn disabled">✅ Onayla</button>
+            <button class="btn disabled">❌ Reddet</button>
+            <span style="font-size:10px;color:var(--tea);display:flex;align-items:center;gap:4px">🔒 SRE Lead yetkisi gerekli</span>
+          </div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  if(R==='viewer') return '';
+
+  // FULL for admin+sre
+  const canEdit = true;
+  return `<div class="page" id="page-sre">
+    <div class="phead"><div><div class="pt">SRE Agent Merkezi</div><div class="ps">LLM tabanlı kök neden · Yarı otonom · Human-in-the-loop</div></div>
+    <div class="pactions">${R==='admin'?`<button class="btn p">⚙ Ayarlar</button>`:''}</div></div>
+    <div style="background:linear-gradient(135deg,rgba(124,58,237,.07),rgba(37,99,235,.05));border:1px solid rgba(124,58,237,.2);border-radius:10px;padding:11px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px">
+      <span style="font-size:18px">🤖</span>
+      <div><div style="font-size:12px;font-weight:700;color:var(--acc3);font-family:'Syne',sans-serif">SRE Agent Aktif — Local LLM Bağlı</div>
+      <div style="font-size:10px;color:var(--txt2)">Endpoint: http://llm.internal:8080 · Model: llama3.1:8b · ~2.3s latency</div></div>
+    </div>
+    <div class="sg sg-4">
+      <div class="sc"><div class="sv" style="color:var(--yel);font-size:24px" id="sre-pending-count">${pendingActions.length}</div><div class="sl">Onay Bekliyor</div></div>
+      <div class="sc"><div class="sv" style="color:var(--grn);font-size:24px">14</div><div class="sl">Otomatik Yapıldı</div></div>
+      <div class="sc"><div class="sv" style="color:var(--acc);font-size:24px">3</div><div class="sl">Çalışıyor</div></div>
+      <div class="sc"><div class="sv" style="color:var(--txt2);font-size:24px">8</div><div class="sl">Reddedildi</div></div>
+    </div>
+    <div class="gm">
+      <div>
+        <div class="card" style="margin-bottom:14px">
+          <div class="ctitle">⏳ Onay Bekleyen Aksiyonlar</div>
+          <div id="sre-pending-list">${buildPendingList()}</div>
+        </div>
+        <div class="card"><div class="ctitle">✅ Otomatik Yapılanlar</div>
+          ${SRE_AUTO.map(a=>`<div style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;border:1px solid rgba(5,150,105,.2);background:rgba(5,150,105,.03);margin-bottom:7px">
+            <span style="font-size:18px">${a.icon}</span>
+            <div style="flex:1"><div style="font-size:11px;font-weight:700;font-family:'Syne',sans-serif">${a.title}</div><div style="font-size:10px;color:var(--txt2)">${a.desc}</div></div>
+            <span style="font-size:9px;color:var(--txt3)">${a.time}</span>
+          </div>`).join('')}
+        </div>
+      </div>
+      <div class="card"><div class="ctitle">🕒 Agent Aktivite</div>
+        <div class="tl">
+          ${[{t:'14:24:33',h:'LLM Analizi Tamamlandı',b:'APP-CORE-01 OOM → restart önerisi',c:'var(--acc3)'},
+             {t:'14:24:15',h:'Slack Bildirimi Gönderildi',b:'#sre-alerts kanalı',c:'var(--acc)'},
+             {t:'14:23:55',h:'JIRA INC-2026-04891 Açıldı',b:'DB yavaşlama ticket',c:'var(--acc3)'},
+             {t:'14:23:01',h:'Zabbix ZBX-10042',b:'HIGH severity event',c:'var(--ora)'},
+             {t:'14:22:30',h:'Maintenance Window',b:'DB-CLUSTER-02 30dk',c:'var(--grn)'},
+             {t:'14:22:05',h:'İlk Anomali Tespit',b:'DB sorgu gecikmesi z=6.3σ',c:'var(--red)'},
+            ].map(e=>`<div class="tli"><div class="tld" style="background:${e.c};border-color:${e.c}"></div><div class="tlt">${e.t}</div><div class="tlh" style="color:${e.c};font-size:10px">${e.h}</div><div class="tlb">${e.b}</div></div>`).join('')}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function buildPendingList() {
+  if(pendingActions.length===0) return `<div style="text-align:center;padding:24px;color:var(--grn);font-size:12px">✅ Onay bekleyen aksiyon yok</div>`;
+  return pendingActions.map(a=>`
+    <div class="ac" id="ac-${a.id}">
+      <div class="ac-head">
+        <div class="ac-icon" style="background:${a.sev==='d'?'rgba(220,38,38,.1)':'rgba(234,88,12,.1)'}">${a.sev==='d'?'🔴':'🟠'}</div>
+        <div style="flex:1"><div class="ac-t">${a.title}</div><div class="ac-s">${a.desc}</div></div>
+        <div style="display:flex;flex-direction:column;gap:3px;align-items:flex-end">
+          <span class="tag t-b">${a.zbx}</span>
+          <span class="tag t-p">${a.itsm}</span>
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--txt2);margin-bottom:8px">${a.steps.map(s=>`<div style="padding:2px 0">• ${s}</div>`).join('')}</div>
+      <div class="ai-box"><div class="ai-lbl">🤖 AI Analizi · llama3.1:8b</div><div class="ai-txt">${a.ai}</div></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn g" onclick="approveAction('${a.id}')">✅ Onayla ve Çalıştır</button>
+        <button class="btn r" onclick="rejectAction('${a.id}')">❌ Reddet</button>
+        <button class="btn" onclick="openAnomModal(${a.id===1?3:1})">👁 Anomali</button>
+      </div>
+    </div>`).join('');
+}
+
+// ── RUNBOOKS ──
+function buildRunbooksPage(R) {
+  const isReadonly = R==='noc';
+  const pid = isReadonly ? 'page-runbooks_readonly' : 'page-runbooks';
+  const stM = {done:{num:'✓',bg:'var(--grn)',cls:'done',badge:'Tamamlandı',bc:'var(--grn)'},run:{num:'↻',bg:'var(--acc)',cls:'running',badge:'Çalışıyor',bc:'var(--acc)'},wait:{num:'!',bg:'var(--yel)',cls:'waiting',badge:'Onay Bekliyor',bc:'var(--yel)'},idle:{num:'○',bg:'var(--txt3)',cls:'idle',badge:'Bekliyor',bc:'var(--txt3)'}};
+  function sHtml(s,i){const st=stM[s.st];return `<div class="rbs ${st.cls}"><div class="rbs-num" style="background:${st.bg};color:#fff">${st.num}</div><div class="rbs-body"><div class="rbs-t">${i+1}. ${s.t}</div><div class="rbs-d">${s.d}</div><div class="rbs-badge" style="background:${st.bg}18;color:${st.bc};border:1px solid ${st.bg}40">${s.auto?'🤖 Otomatik':'👤 Onay Gerekli'} · ${st.badge}</div></div></div>`;}
+  const oom = [{t:'Heap Dump Al',d:'jmap -dump:format=b,file=/tmp/heap.hprof {pid}',auto:true,st:'done'},{t:'Cache Temizle',d:'POST /actuator/caches',auto:true,st:'done'},{t:'Servis Restart',d:'systemctl restart app-core — ~30s downtime',auto:false,st:'wait'},{t:'Sağlık Kontrol',d:'GET /actuator/health',auto:true,st:'idle'}];
+  const ela = [{t:'DB Pool Kontrol',d:'SELECT count(*) FROM pg_stat_activity',auto:true,st:'idle'},{t:'Yavaş Sorgu Tespit',d:'pg_stat_statements ORDER BY mean_time DESC',auto:true,st:'idle'},{t:'Uzun Transaction Kill',d:'pg_terminate_backend(pid)',auto:false,st:'idle'},{t:'Pool Reset',d:'pgbouncer RECONNECT',auto:false,st:'idle'}];
+  return `<div class="page" id="${pid}">
+    <div class="phead"><div><div class="pt">Runbook Kütüphanesi</div><div class="ps">YAML tabanlı · Otomatik ve onaylı adımlar${isReadonly?' · Görüntüleme modu':''}</div></div>
+    ${!isReadonly&&R==='admin'?`<div class="pactions"><button class="btn p">+ Yeni Runbook</button></div>`:''}
+    </div>
+    ${isReadonly?`<div class="readonly-banner">👁️ NOC Analyst — Runbook'ları görüntüleyebilirsiniz ancak çalıştıramazsınız.</div>`:''}
+    <div class="g2">
+      <div class="card">
+        <div class="ctitle">📋 OOM Recovery <span class="tag t-g">Aktif</span></div>
+        <div style="font-size:11px;color:var(--txt2);margin-bottom:12px">OutOfMemoryError tespitinde heap dump alır, cache temizler, restart eder.</div>
+        ${oom.map(sHtml).join('')}
+        ${!isReadonly?`<div style="margin-top:12px;display:flex;gap:8px"><button class="btn g" onclick="runRunbook('OOM Recovery')">▶ Çalıştır</button><button class="btn">✏ Düzenle</button></div>`:`<div style="margin-top:10px;font-size:10px;color:var(--tea)">🔒 Çalıştırmak için SRE Lead yetkisi gerekli</div>`}
+      </div>
+      <div class="card">
+        <div class="ctitle">📋 High Elapsed Recovery <span class="tag t-y">Hazır</span></div>
+        <div style="font-size:11px;color:var(--txt2);margin-bottom:12px">Gecikme anomalisinde DB pool kontrolü ve sorgu analizi yapar.</div>
+        ${ela.map(sHtml).join('')}
+        ${!isReadonly?`<div style="margin-top:12px;display:flex;gap:8px"><button class="btn p" onclick="runRunbook('High Elapsed Recovery')">▶ Çalıştır</button><button class="btn">✏ Düzenle</button></div>`:`<div style="margin-top:10px;font-size:10px;color:var(--tea)">🔒 Çalıştırmak için SRE Lead yetkisi gerekli</div>`}
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── ACTIONS ──
+function buildActionsPage(R) {
+  if(R!=='admin'&&R!=='sre') return '';
+  const rows = AUDIT_LOG.map(a=>{
+    const kc = a.karar==='Otomatik'?'t-b':a.karar==='Onaylandı'?'t-g':'t-r';
+    return `<tr><td style="color:var(--txt2)">${a.time}</td><td style="font-weight:600">${a.action}</td><td style="color:var(--acc);font-family:'JetBrains Mono',monospace">${a.target}</td><td><span class="tag ${kc}">${a.karar}</span></td><td style="color:var(--txt2)">${a.by}</td><td style="font-size:14px">${a.sonuc}</td></tr>`;
+  }).join('');
+  return `<div class="page" id="page-actions">
+    <div class="phead"><div><div class="pt">Aksiyon Geçmişi</div><div class="ps">Audit log · Değiştirilemez kayıt · Tüm agent aksiyonları</div></div></div>
+    <div class="card"><div class="ctitle">📜 Audit Log</div>
+      <div style="overflow:auto;max-height:500px"><table class="tbl">
+        <thead><tr><th>Zaman</th><th>Aksiyon</th><th>Hedef</th><th>Karar</th><th>Onaylayan</th><th>Sonuç</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+    </div>
+  </div>`;
+}
+
+// ── USERS ──
+function buildUsersPage(R) {
+  if(R!=='admin') return '';
+  const urows = USERS_DATA.map(u=>`
+    <div class="urow">
+      <div class="uav" style="background:${u.col}">${u.av}</div>
+      <div style="flex:1"><div class="unm">${u.nm}</div><div class="uem">${u.em}</div></div>
+      <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+        <div>${u.roles.map(r=>`<span class="tag t-b">${r}</span>`).join('')} <span class="tag t-gr">${u.auth}</span></div>
+        <div style="font-size:9px;color:var(--txt3)">${u.last}</div>
+      </div>
+    </div>`).join('');
+  return `<div class="page" id="page-users">
+    <div class="phead"><div><div class="pt">Kullanıcı Yönetimi</div><div class="ps">LDAP + Local · Rol ataması</div></div>
+    <div class="pactions"><button class="btn p" onclick="toast('Kullanıcı ekleme formu açılıyor','i')">+ Kullanıcı Ekle</button></div></div>
+    <div class="gm2">
+      <div class="card"><div class="ctitle">📊 Özet</div>
+        ${[{l:'Admin',v:2,c:'var(--acc3)',p:20},{l:'SRE Lead',v:3,c:'var(--acc)',p:30},{l:'NOC Analyst',v:5,c:'var(--tea)',p:50},{l:'Viewer',v:4,c:'var(--txt3)',p:40}].map(s=>`<div class="pr"><div class="pl">${s.l}</div><div class="pt2"><div class="pf" style="width:${s.p}%;background:${s.c}"></div></div><div class="pv" style="color:${s.c}">${s.v}</div></div>`).join('')}
+        <div style="height:1px;background:rgba(180,200,240,.3);margin:10px 0"></div>
+        <div class="pr"><div class="pl">LDAP / AD</div><div class="pt2"><div class="pf" style="width:70%;background:var(--acc)"></div></div><div class="pv">10</div></div>
+        <div class="pr"><div class="pl">Local</div><div class="pt2"><div class="pf" style="width:30%;background:var(--grn)"></div></div><div class="pv">4</div></div>
+      </div>
+      <div class="card"><div class="ctitle">👥 Kullanıcılar</div>${urows}</div>
+    </div>
+  </div>`;
+}
+
+// ── ROLES ──
+function buildRolesPage(R) {
+  if(R!=='admin') return '';
+  const perms = PERMISSIONS_DATA.sre;
+  const pgHtml = perms.map(p=>`<div class="pi ${p.on?'on':'off'}">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div class="pi-n" style="color:${p.on?'var(--grn)':'var(--txt2)'}">${p.nm.split('.').pop()}</div>
+      <button class="toggle ${p.on?'on':'off'}" onclick="this.classList.toggle('on');this.classList.toggle('off');this.closest('.pi').classList.toggle('on');this.closest('.pi').classList.toggle('off')"></button>
+    </div>
+    <div class="pi-d">${p.desc}</div>
+  </div>`).join('');
+  const roles = ['Admin','SRE Lead','NOC Analyst','Viewer'];
+  const rcolors = ['#7c3aed','#2563eb','#0891b2','#94a3b8'];
+  const rcounts = [2,3,5,4];
+  const rdescs = ['Tam erişim','Anomali + Agent + onay','Görüntüleme + log','Sadece dashboard'];
+  return `<div class="page" id="page-roles">
+    <div class="phead"><div><div class="pt">Rol & İzin Yönetimi</div><div class="ps">Özelleştirilebilir RBAC · Permission bazlı erişim</div></div>
+    <div class="pactions"><button class="btn p" onclick="toast('Yeni rol oluşturma formu açılıyor','i')">+ Yeni Rol</button></div></div>
+    <div class="g2">
+      <div class="card"><div class="ctitle">🔑 Roller</div>
+        ${roles.map((r,i)=>`<div class="urow"><div class="uav" style="background:${rcolors[i]}">${r[0]}</div><div style="flex:1"><div class="unm">${r}</div><div class="uem">${rdescs[i]}</div></div><div style="text-align:right"><div style="font-size:20px;font-weight:700;color:${rcolors[i]};font-family:'JetBrains Mono',monospace">${rcounts[i]}</div><div style="font-size:9px;color:var(--txt3)">kullanıcı</div></div></div>`).join('')}
+      </div>
+      <div class="card"><div class="ctitle">🔒 İzin Matrisi — SRE Lead</div>
+        <div class="pg">${pgHtml}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── SETTINGS ──
+function buildSettingsPage(R) {
+  if(R!=='admin') return '';
+  function tRow(lbl,val,isGrn=true){return `<div class="pr" style="margin-bottom:10px"><div class="pl" style="font-size:11px;min-width:150px">${lbl}</div><div style="font-size:11px;color:${isGrn?'var(--acc)':'var(--txt)'};font-family:'JetBrains Mono',monospace">${val}</div></div>`;}
+  function tRowToggle(lbl,on){return `<div class="pr" style="margin-bottom:10px"><div class="pl" style="font-size:11px;min-width:150px">${lbl}</div><button class="toggle ${on?'on':'off'}" onclick="this.classList.toggle('on');this.classList.toggle('off')"></button></div>`;}
+  return `<div class="page" id="page-settings">
+    <div class="phead"><div><div class="pt">Sistem Ayarları</div><div class="ps">LDAP, LLM, Zabbix, Bildirim yapılandırması</div></div>
+    <div class="pactions"><button class="btn p" onclick="toast('Ayarlar kaydedildi','s')">💾 Kaydet</button></div></div>
+    <div class="g2">
+      <div class="card"><div class="ctitle">🔐 LDAP / Active Directory</div>
+        ${tRow('LDAP URL','ldap://ad.internal:389')}
+        ${tRow('Base DN','DC=bank,DC=internal',false)}
+        <div class="pr" style="margin-bottom:10px"><div class="pl" style="font-size:11px;min-width:150px">Durum</div><span class="tag t-g">Bağlı</span></div>
+        ${tRowToggle('Local Fallback',true)}
+      </div>
+      <div class="card"><div class="ctitle">🤖 LLM Servisi</div>
+        ${tRow('Endpoint','http://llm.internal:8080')}
+        ${tRow('Model','llama3.1:8b',false)}
+        <div class="pr" style="margin-bottom:10px"><div class="pl" style="font-size:11px;min-width:150px">Durum</div><span class="tag t-g">Aktif · 2.3s</span></div>
+        ${tRowToggle('Sadece HIGH+',true)}
+      </div>
+      <div class="card"><div class="ctitle">📡 Zabbix API</div>
+        ${tRow('URL','https://zabbix.internal/api')}
+        <div class="pr" style="margin-bottom:10px"><div class="pl" style="font-size:11px;min-width:150px">Durum</div><span class="tag t-g">Bağlı</span></div>
+        ${tRowToggle('Dry Run (test modu)',false)}
+      </div>
+      <div class="card"><div class="ctitle">💬 Bildirimler</div>
+        ${tRowToggle('Slack',true)}
+        ${tRowToggle('Microsoft Teams',false)}
+        ${tRowToggle('JIRA ITSM',true)}
+        ${tRowToggle('E-posta',true)}
+      </div>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════
+function showPage(name, navEl) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  const pg = document.getElementById('page-'+name);
+  if(pg) pg.classList.add('active');
+  if(navEl) navEl.classList.add('active');
+  if((name==='logstream')&&!logInterval) startLogStream();
+  // Update t-faz
+  const fazMap = {dashboard:'Faz 1 · Log Anomalisi',dashboard_readonly:'Faz 1 · Log Anomalisi',anomalies:'Faz 1 · Anomaliler',anomalies_readonly:'Faz 1 · Anomaliler',logstream:'Faz 1 · Log Akışı',errorcodes:'Faz 1 · Hata Kodları',sre:'SRE Agent · Merkez',sre_readonly:'SRE Agent · Görüntüleme',runbooks:'SRE Agent · Runbook\'lar',runbooks_readonly:'SRE Agent · Runbook\'lar',actions:'SRE Agent · Audit Log',users:'Yönetim · Kullanıcılar',roles:'Yönetim · Rol & İzinler',settings:'Yönetim · Sistem Ayarları'};
+  document.getElementById('t-faz').textContent = fazMap[name]||'NEXUS Platform';
+}
+
+// ══════════════════════════════════════════════
+// FILTER
+// ══════════════════════════════════════════════
+function filterAnoms(sev, btn) {
+  document.querySelectorAll('#page-anomalies .btn').forEach(b=>b.classList.remove('p'));
+  btn.classList.add('p');
+  const list = sev==='all' ? ANOMALIES : ANOMALIES.filter(a=>a.sev===sev);
+  document.getElementById('anom-list').innerHTML = anomListHtml(list, currentRole);
+}
+
+// ══════════════════════════════════════════════
+// ANOMALY MODAL
+// ══════════════════════════════════════════════
+function openAnomModal(id) {
+  const a = ANOMALIES.find(x=>x.id===id);
+  if(!a) return;
+  const sevL = {d:'KRİTİK',h:'YÜKSEK',w:'UYARI'}[a.sev];
+  const sevCls = {d:'sd',h:'sh2b',w:'sw'}[a.sev];
+  document.getElementById('m-badge').innerHTML = `<span class="asev ${sevCls}">${sevL}</span>`;
+  document.getElementById('m-title').textContent = a.title;
+  const canAct = currentRole==='admin'||currentRole==='sre';
+  document.getElementById('m-body').innerHTML = `
+    <div class="dr"><div class="dk">Anomali Tipi:</div><div class="dv">${a.type}</div></div>
+    <div class="dr"><div class="dk">Servis:</div><div class="dv" style="color:var(--acc)">${a.svc}</div></div>
+    <div class="dr"><div class="dk">Algoritma:</div><div class="dv">${a.algo}</div></div>
+    <div class="dr"><div class="dk">Skor:</div><div class="dv" style="color:var(--red);font-weight:700">${Math.round(a.score*100)} / 100</div></div>
+    <div class="dr"><div class="dk">Result Kodu:</div><div class="dv"><span class="tag ${a.rcat==='SYS'?'t-o':'t-r'}">${a.rcat}</span> ${a.rc} — ${a.rd}</div></div>
+    <div class="dr"><div class="dk">Tespit Zamanı:</div><div class="dv">${a.time}</div></div>
+    <div class="divline"></div>
+    <div class="ai-box">
+      <div class="ai-lbl">🤖 AI KÖK NEDEN ANALİZİ <span style="font-size:9px;color:var(--txt3);font-weight:400">· Local LLM · llama3.1:8b</span></div>
+      <div class="ai-txt">${a.ai}</div>
+    </div>
+    ${canAct?`<div style="margin-top:14px;display:flex;gap:8px">
+      <button class="btn g" onclick="closeModal();toast('SRE Agent devreye alındı — analiz başlıyor','i')">🤖 Agent\'a Gönder</button>
+      <button class="btn p" onclick="closeModal();toast('Zabbix event açıldı','s')">📡 Zabbix Event</button>
+      <button class="btn" onclick="closeModal()">Kapat</button>
+    </div>`:currentRole==='noc'?`<div style="margin-top:14px">
+      <div style="font-size:10px;color:var(--tea);background:rgba(8,145,178,.07);border:1px solid rgba(8,145,178,.2);border-radius:8px;padding:8px 12px">
+        🔒 Aksiyon başlatmak için SRE Lead veya Admin rolü gereklidir
+      </div>
+      <button class="btn" style="margin-top:10px" onclick="closeModal()">Kapat</button>
+    </div>`:`<div style="margin-top:14px"><button class="btn" onclick="closeModal()">Kapat</button></div>`}
+  `;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open');}
+
+// ══════════════════════════════════════════════
+// SRE ACTIONS
+// ══════════════════════════════════════════════
+function approveAction(id) {
+  pendingActions = pendingActions.filter(a=>a.id!==id);
+  const el = document.getElementById('ac-'+id);
+  if(el){el.style.transition='all .3s';el.style.opacity='0';el.style.transform='translateX(20px)';setTimeout(()=>{el.remove();refreshPending();},300);}
+  toast(`✅ Aksiyon onaylandı — Agent çalıştırıyor…`,'s');
+  setTimeout(()=>toast('🔄 Runbook adımı başlatıldı','i'),1000);
+  setTimeout(()=>toast('✅ İşlem tamamlandı · Audit log güncellendi','s'),3000);
+}
+function rejectAction(id) {
+  pendingActions = pendingActions.filter(a=>a.id!==id);
+  const el = document.getElementById('ac-'+id);
+  if(el){el.style.transition='all .3s';el.style.opacity='0';setTimeout(()=>{el.remove();refreshPending();},300);}
+  toast('❌ Aksiyon reddedildi — Kayıt oluşturuldu','e');
+}
+function refreshPending(){
+  const el = document.getElementById('sre-pending-list');
+  if(el) el.innerHTML = buildPendingList();
+  const cnt = document.getElementById('sre-pending-count');
+  if(cnt) cnt.textContent = pendingActions.length;
+  buildSidebar();
+}
+
+function runRunbook(name){
+  toast(`${name} başlatıldı…`,'i');
+  setTimeout(()=>toast('Adım 1 tamamlandı ✓','s'),1200);
+  setTimeout(()=>toast('Adım 2 tamamlandı ✓','s'),2400);
+  setTimeout(()=>toast(`${name} — Adım 3: ONAY GEREKİYOR ⚠️`,'w'),3600);
+}
+
+// ══════════════════════════════════════════════
+// LOG STREAM
+// ══════════════════════════════════════════════
+const SVC_SHORT = ['OVD_BAAS','ACCT_BAL','EFT_DOM','CARD_PAY','LOAN_INS','LOGIN','STMT','BILL_PAY'];
+const EC_MAP = {1002:'DB timeout',1010:'Servis down',1012:'Circuit open',2002:'Session exp',7503:'Yetersiz bakiye',7520:'Hesap yok',7552:'CVV hatalı',7560:'TCMB err'};
+
+function startLogStream(){
+  const tbody = document.getElementById('log-tbody');
+  if(!tbody) return;
+  logInterval = setInterval(()=>{
+    if(logPaused) return;
+    const ch = ['747','101','201','301','401','501'][Math.floor(Math.random()*6)];
+    const svc = SVC_SHORT[Math.floor(Math.random()*SVC_SHORT.length)];
+    const elapsed = Math.random()<0.04?Math.floor(3000+Math.random()*8000):Math.floor(30+Math.random()*300);
+    const isErr = Math.random()<0.06;
+    const errCodes = [1002,1010,1012,2002,7503,7520,7552,7560];
+    const code = isErr ? errCodes[Math.floor(Math.random()*errCodes.length)] : 0;
+    const desc = code===0?'—':(EC_MAP[code]||'Bilinmeyen hata');
+    lsTotal++; if(code!==0) lsErr++;
+    const t1=document.getElementById('ls-total'),t2=document.getElementById('ls-err'),t3=document.getElementById('ls-rate');
+    if(t1) t1.textContent=lsTotal.toLocaleString();
+    if(t2) t2.textContent=lsErr.toLocaleString();
+    if(t3) t3.textContent=`%${(lsErr/lsTotal*100).toFixed(1)}`;
+    const ec=elapsed>3000?'eslow':elapsed>400?'emed':'efast';
+    const rc=code===0?'rok':code<7500?'rsys':'rbiz';
+    const tr=document.createElement('tr');
+    tr.className=code&&code<7500?'ar':code>7500?'wr':'';
+    tr.innerHTML=`<td style="color:var(--txt3)">${new Date().toTimeString().slice(0,8)}</td><td style="color:var(--tea);font-weight:600">${ch}</td><td style="font-size:9px">${svc}</td><td class="${ec}">${elapsed}</td><td class="${rc}">${code}</td><td style="font-size:9px;color:${code===0?'var(--txt3)':code<7500?'var(--ora)':'var(--red)'}">${desc}</td>`;
+    tbody.insertBefore(tr,tbody.firstChild);
+    if(tbody.children.length>200) tbody.removeChild(tbody.lastChild);
+  },180);
+}
+
+function toggleLogPause(btn){
+  logPaused=!logPaused;
+  btn.textContent=logPaused?'▶ Devam':'⏸ Durdur';
+}
+
+// ══════════════════════════════════════════════
+// NOTIF
+// ══════════════════════════════════════════════
+function toggleNotif(){notifOpen=!notifOpen;/* simple toggle demo */toast(notifOpen?'4 okunmamış bildirim':'Bildirimler kapatıldı','i');}
+
+// ══════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════
+function toast(msg,type='i'){
+  const wrap=document.getElementById('toast-wrap');
+  const t=document.createElement('div');
+  t.className=`toast ${type}`;
+  const icons={s:'✅',e:'❌',i:'ℹ️',w:'⚠️'};
+  t.innerHTML=`<span>${icons[type]||'ℹ️'}</span><span>${msg}</span>`;
+  wrap.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(20px)';t.style.transition='all .3s';setTimeout(()=>t.remove(),300);},3800);
+}
+
+// ══════════════════════════════════════════════
+// LOGIN ROLE FIX — handle arg order bug
+// ══════════════════════════════════════════════
+document.querySelectorAll('.role-opt').forEach((el,i)=>{
+  const roles=['admin','sre','noc','viewer'];
+  el.onclick=function(){
+    document.querySelectorAll('.role-opt').forEach(e=>e.classList.remove('sel'));
+    this.classList.add('sel');
+    currentRole=roles[i];
+    document.getElementById('l-user').value=ROLE_USERS[roles[i]];
+  };
+});
+</script>
+</body>
+</html>
